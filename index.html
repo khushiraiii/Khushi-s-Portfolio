@@ -1,0 +1,1174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Khushi Rai | AI Engineer</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#050510;--purple:#7c3aed;--cyan:#06b6d4;--indigo:#4f46e5;
+  --lp:#a78bfa;--white:#f0f0f8;--gray:#8892b0;--surface:#0d0d2b;
+  --border:#1e1e4f;--gp:0 0 20px rgba(124,58,237,.6);--gc:0 0 20px rgba(6,182,212,.6);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;}
+body{background:var(--bg);color:var(--white);font-family:'Inter',sans-serif;cursor:none;}
+
+/* ── CURSOR ── */
+#cur{position:fixed;width:18px;height:18px;border:2px solid var(--cyan);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:transform .1s;box-shadow:var(--gc);}
+#curd{position:fixed;width:5px;height:5px;background:var(--cyan);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);}
+
+/* ── PARTICLES ── */
+#pcv{position:fixed;inset:0;z-index:0;pointer-events:none;}
+
+/* ════════ LANDING ════════ */
+#landing{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;transition:opacity .8s ease,transform .8s ease;}
+#landing.exit{opacity:0;transform:scale(1.15);pointer-events:none;}
+
+/* draggable monitor wrapper */
+#monDrag{position:relative;z-index:10;display:inline-flex;flex-direction:column;align-items:center;user-select:none;}
+#monDrag.grabbing{cursor:grabbing!important;}
+
+.monitor{
+  width:min(480px,88vw);
+  background:linear-gradient(135deg,#1a1a3e,#0d0d2b);
+  border:3px solid var(--purple);border-radius:14px 14px 4px 4px;
+  box-shadow:var(--gp),0 0 60px rgba(124,58,237,.12),inset 0 0 40px rgba(124,58,237,.05);
+  transform-style:preserve-3d;transform-origin:center center;
+  transition:box-shadow .3s;
+}
+.mon-screen{
+  background:#020210;margin:14px;border-radius:8px;padding:28px 22px 24px;
+  min-height:210px;position:relative;overflow:hidden;border:1px solid var(--border);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;
+  cursor:grab;
+}
+.mon-screen:active{cursor:grabbing;}
+.mon-screen::after{content:'';position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.12) 2px,rgba(0,0,0,.12) 4px);pointer-events:none;z-index:5;}
+.mon-screen::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 0%,rgba(124,58,237,.08) 0%,transparent 70%);pointer-events:none;}
+.s-hdr{font-family:'Share Tech Mono',monospace;color:var(--lp);font-size:.65rem;letter-spacing:2px;opacity:.6;align-self:flex-start;z-index:2;}
+.s-name{font-family:'Orbitron',monospace;font-size:clamp(1.3rem,5vw,2rem);font-weight:900;background:linear-gradient(90deg,var(--purple),var(--cyan),var(--lp));-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-align:center;letter-spacing:3px;z-index:2;animation:gname 3s ease-in-out infinite alternate;}
+@keyframes gname{from{filter:brightness(1);}to{filter:brightness(1.3) drop-shadow(0 0 8px rgba(167,139,250,.5));}}
+.s-sub{font-family:'Share Tech Mono',monospace;color:var(--cyan);font-size:clamp(.6rem,2vw,.75rem);text-align:center;letter-spacing:1px;opacity:.8;z-index:2;}
+.enter-btn{background:transparent;border:2px solid var(--purple);color:var(--lp);font-family:'Orbitron',monospace;font-size:clamp(.65rem,2.5vw,.85rem);font-weight:700;letter-spacing:3px;padding:12px 28px;border-radius:4px;cursor:pointer;position:relative;overflow:hidden;transition:all .3s;animation:pborder 2s ease-in-out infinite;z-index:6;}
+.enter-btn::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--purple),var(--cyan));opacity:0;transition:opacity .3s;}
+.enter-btn:hover::before{opacity:.15;}
+.enter-btn:hover{box-shadow:var(--gp);color:var(--white);transform:scale(1.05);}
+.enter-btn span{position:relative;z-index:1;}
+@keyframes pborder{0%,100%{box-shadow:0 0 10px rgba(124,58,237,.4);}50%{box-shadow:0 0 28px rgba(124,58,237,.9),0 0 50px rgba(124,58,237,.3);}}
+
+/* stand — drag handle to move monitor position */
+.mon-neck{width:70px;height:18px;background:linear-gradient(180deg,#1a1a3e,#0d0d28);border-left:2px solid var(--border);border-right:2px solid var(--border);cursor:move;}
+.mon-stand{width:160px;height:10px;background:linear-gradient(135deg,#1a1a3e,#12123a);border:2px solid var(--border);border-radius:4px;cursor:move;}
+.mon-drag-hint{font-family:'Share Tech Mono',monospace;font-size:.55rem;color:var(--purple);opacity:.5;margin-top:6px;letter-spacing:1px;animation:hint-fade 4s ease-in-out 2s forwards;}
+@keyframes hint-fade{0%{opacity:.5;}100%{opacity:0;}}
+
+/* keyboard */
+.kb-wrap{position:fixed;bottom:0;left:50%;transform:translateX(-50%) translateY(110%);transition:transform 1.3s cubic-bezier(.34,1.56,.64,1);width:min(560px,92vw);z-index:10;cursor:move;}
+.kb-wrap.in{transform:translateX(-50%) translateY(0);}
+@media(max-width:500px){.kb-wrap{display:none;}}
+.kb{background:linear-gradient(135deg,#0f0f28,#1a1a3e);border:2px solid var(--border);border-bottom:none;border-radius:8px 8px 0 0;padding:10px 14px 6px;box-shadow:0 -4px 30px rgba(124,58,237,.2);position:relative;overflow:hidden;animation:kb-glow 5s ease-in-out infinite;}
+.kb::before{content:'';position:absolute;top:0;bottom:0;left:0;width:45%;background:linear-gradient(90deg,transparent 0%,rgba(124,58,237,.18) 25%,rgba(6,182,212,.28) 55%,rgba(167,139,250,.18) 80%,transparent 100%);animation:kb-sweep 5s ease-in-out infinite;pointer-events:none;z-index:8;border-radius:6px;}
+@keyframes kb-sweep{0%{transform:translateX(-130%);opacity:0;}10%{opacity:1;}90%{opacity:1;}100%{transform:translateX(320%);opacity:0;}}
+@keyframes kb-glow{0%,100%{border-color:rgba(124,58,237,.5);box-shadow:0 -4px 30px rgba(124,58,237,.25);}50%{border-color:rgba(6,182,212,.5);box-shadow:0 -4px 30px rgba(6,182,212,.28);}}
+.kr{display:flex;gap:4px;justify-content:center;margin-bottom:4px;}
+.k{background:#1a1a3e;border:1px solid var(--border);border-bottom:3px solid #0d0d28;border-radius:3px;height:26px;min-width:26px;font-family:'Share Tech Mono',monospace;font-size:.5rem;color:var(--gray);display:flex;align-items:center;justify-content:center;padding:0 3px;transition:all .08s;user-select:none;position:relative;z-index:9;}
+.k:hover{background:rgba(124,58,237,.4);color:#fff;transform:translateY(3px);border-bottom-width:1px;box-shadow:0 0 6px rgba(124,58,237,.5);cursor:pointer;}
+.k.w{min-width:48px;}.k.ww{min-width:72px;}.k.sp{min-width:160px;}
+
+/* ════════ DESKTOP ════════ */
+#desk{position:fixed;inset:0;opacity:0;pointer-events:none;transition:opacity .8s ease;overflow:hidden;}
+#desk.on{opacity:1;pointer-events:all;}
+/* Drag hint toast */
+#dragHint{position:fixed;bottom:58px;left:50%;transform:translateX(-50%);background:rgba(124,58,237,.13);border:1px solid rgba(124,58,237,.45);color:var(--lp);padding:7px 18px;border-radius:20px;font-family:'Share Tech Mono',monospace;font-size:.72rem;backdrop-filter:blur(10px);white-space:nowrap;opacity:0;pointer-events:none;z-index:9999;letter-spacing:.03em;}
+#dragHint.show{animation:hintFade 7s ease forwards;}
+@keyframes hintFade{0%{opacity:0;transform:translateX(-50%) translateY(10px);}12%{opacity:1;transform:translateX(-50%) translateY(0);}78%{opacity:1;transform:translateX(-50%) translateY(0);}100%{opacity:0;transform:translateX(-50%) translateY(-5px);}}
+.dbg{position:absolute;inset:0;background:radial-gradient(ellipse at 15% 50%,rgba(124,58,237,.12) 0%,transparent 55%),radial-gradient(ellipse at 85% 20%,rgba(6,182,212,.08) 0%,transparent 50%),radial-gradient(ellipse at 60% 85%,rgba(79,70,229,.1) 0%,transparent 50%),#050510;}
+.dgrid{position:absolute;inset:0;background-image:linear-gradient(rgba(124,58,237,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(124,58,237,.04) 1px,transparent 1px);background-size:40px 40px;}
+
+.topbar{position:absolute;top:0;left:0;right:0;height:34px;background:rgba(13,13,43,.97);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 16px;z-index:50;backdrop-filter:blur(10px);}
+.tb-l{font-family:'Orbitron',monospace;font-size:.65rem;font-weight:700;color:var(--lp);letter-spacing:2px;}
+.tb-r{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--gray);display:flex;gap:12px;align-items:center;}
+#clk{color:var(--cyan);}
+.home-btn{font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--white);background:rgba(124,58,237,.15);border:1px solid rgba(124,58,237,.4);border-radius:4px;padding:3px 10px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:5px;}
+.home-btn:hover{background:rgba(124,58,237,.35);box-shadow:var(--gp);color:var(--white);}
+
+/* draggable folder icons */
+.icons{position:absolute;top:34px;left:0;right:0;bottom:46px;overflow:hidden;}
+.fi{position:absolute;display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;transition:transform .15s;width:82px;user-select:none;}
+.fi:hover .fii{box-shadow:var(--gp);border-color:var(--purple);}
+.fi.dragging-fi{cursor:grabbing;z-index:300;transition:none;}
+.fi.dragging-fi .fii{box-shadow:0 0 30px rgba(124,58,237,.8),var(--gp);transform:scale(1.1);}
+.fii{width:60px;height:52px;background:linear-gradient(135deg,rgba(124,58,237,.15),rgba(79,70,229,.08));border:2px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;transition:all .3s;position:relative;}
+.fii::before{content:'';position:absolute;top:-5px;left:5px;width:22px;height:5px;background:rgba(124,58,237,.3);border-radius:3px 3px 0 0;border:1px solid var(--border);border-bottom:none;}
+.fl{font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--white);text-align:center;line-height:1.3;}
+.fi.chat .fii{background:linear-gradient(135deg,rgba(6,182,212,.15),rgba(79,70,229,.08));border-color:rgba(6,182,212,.3);animation:cpulse 3s ease-in-out infinite;}
+@keyframes cpulse{0%,100%{box-shadow:0 0 8px rgba(6,182,212,.2);}50%{box-shadow:0 0 20px rgba(6,182,212,.6);}}
+
+.tbar{position:absolute;bottom:0;left:0;right:0;height:46px;background:rgba(13,13,43,.97);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 14px;gap:4px;z-index:50;backdrop-filter:blur(10px);overflow-x:auto;}
+.tbar::-webkit-scrollbar{height:2px;}
+.tbar::-webkit-scrollbar-thumb{background:var(--purple);}
+.ti{display:flex;align-items:center;gap:5px;padding:4px 9px;border-radius:4px;font-family:'Share Tech Mono',monospace;font-size:.6rem;color:var(--gray);cursor:pointer;transition:all .2s;border:1px solid transparent;white-space:nowrap;flex-shrink:0;}
+.ti:hover{background:rgba(124,58,237,.15);border-color:var(--border);color:var(--white);}
+.ti.on{background:rgba(124,58,237,.22);border-color:var(--purple);color:var(--lp);}
+
+/* ════════ WINDOWS ════════ */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:150;display:none;backdrop-filter:blur(3px);}
+.overlay.show{display:block;}
+.win{position:fixed;background:rgba(8,8,22,.97);border:1px solid var(--border);border-radius:10px;box-shadow:0 24px 70px rgba(0,0,0,.7),0 0 0 1px rgba(124,58,237,.08);z-index:200;display:none;flex-direction:column;overflow:hidden;backdrop-filter:blur(20px);top:50%;left:50%;transform:translate(-50%,-50%);width:min(820px,94vw);max-height:82vh;}
+.win.open{display:flex;animation:wfade .3s ease;}
+.win.maximized{position:fixed!important;inset:0!important;width:100%!important;max-height:100%!important;transform:none!important;border-radius:0!important;}
+.win.minimized .wc,.win.minimized .chat-wrap,.win.minimized .win-resize{display:none!important;}
+.win.minimized{max-height:none!important;transform:none!important;border-radius:8px!important;box-shadow:0 4px 20px rgba(0,0,0,.5),0 0 0 1px rgba(124,58,237,.25)!important;transition:box-shadow .2s,transform .2s;}
+.win.minimized:hover{box-shadow:0 6px 28px rgba(124,58,237,.35),0 0 0 1px rgba(124,58,237,.5)!important;transform:translateY(-3px)!important;}
+.win.minimized .wtb{cursor:pointer;border-radius:8px!important;border-bottom:none!important;}
+.win.minimized .wt::after{content:' — click to restore';font-size:.55rem;opacity:.55;font-family:'Share Tech Mono',monospace;letter-spacing:1px;}
+@keyframes wfade{from{opacity:0;transform:translate(-50%,-50%) scale(.96);}to{opacity:1;transform:translate(-50%,-50%) scale(1);}}
+@media(max-width:640px){
+  .win{top:34px;left:0;right:0;bottom:46px;transform:none;width:100%;max-height:none;border-radius:0;border-left:none;border-right:none;}
+  .win.open{animation:wfade-m .3s ease;}
+  .win.maximized{inset:0!important;border-radius:0!important;}
+  @keyframes wfade-m{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+}
+.wtb{display:flex;align-items:center;justify-content:space-between;padding:9px 14px;background:rgba(13,13,43,.98);border-bottom:1px solid var(--border);flex-shrink:0;cursor:move;user-select:none;}
+.win.maximized .wtb{cursor:default;}
+.wt{font-family:'Orbitron',monospace;font-size:.65rem;color:var(--lp);letter-spacing:2px;font-weight:700;pointer-events:none;}
+.wbtns{display:flex;gap:6px;cursor:default;}
+.wb{width:11px;height:11px;border-radius:50%;cursor:pointer;border:none;transition:all .2s;position:relative;}
+.wb:hover{opacity:.75;transform:scale(1.15);}
+.wb::after{content:'';position:absolute;inset:-4px;border-radius:50%;}
+.wb.cl{background:#ff5f56;}.wb.mn{background:#ffbd2e;}.wb.mx{background:#27c93f;}
+.wc{overflow-y:auto;flex:1;padding:22px;}
+.wc::-webkit-scrollbar{width:3px;}
+.wc::-webkit-scrollbar-thumb{background:var(--purple);border-radius:2px;}
+/* win resize handle */
+.win-resize{position:absolute;bottom:0;right:0;width:16px;height:16px;cursor:se-resize;z-index:5;}
+.win-resize::after{content:'';position:absolute;bottom:3px;right:3px;width:8px;height:8px;border-right:2px solid rgba(124,58,237,.4);border-bottom:2px solid rgba(124,58,237,.4);}
+
+/* section title */
+.st{font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--purple);margin-bottom:16px;display:flex;align-items:center;gap:6px;}
+.st::before{content:'$ ';color:var(--cyan);}
+.st::after{content:'';flex:1;height:1px;background:var(--border);margin-left:6px;}
+
+/* ── ABOUT ── */
+.ab-hdr{display:flex;gap:22px;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap;}
+.av{width:76px;height:76px;border-radius:50%;flex-shrink:0;background:linear-gradient(135deg,var(--purple),var(--cyan));display:flex;align-items:center;justify-content:center;font-family:'Orbitron',monospace;font-size:1.5rem;font-weight:900;color:#fff;box-shadow:0 0 30px rgba(124,58,237,.5);}
+.ab-name{font-family:'Orbitron',monospace;font-size:1.25rem;font-weight:900;background:linear-gradient(90deg,var(--lp),var(--cyan));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:3px;}
+.ab-tag{font-family:'Share Tech Mono',monospace;color:var(--cyan);font-size:.75rem;margin-bottom:10px;}
+.ab-p{color:var(--gray);font-size:.83rem;line-height:1.75;}
+.badge-pub{display:inline-flex;align-items:center;gap:5px;font-family:'Share Tech Mono',monospace;font-size:.62rem;padding:3px 9px;border-radius:4px;margin-top:6px;background:rgba(6,182,212,.08);border:1px solid rgba(6,182,212,.3);color:var(--cyan);}
+.quick-facts{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;}
+.qf{font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--gray);}
+.qf span{color:var(--cyan);}
+.ab-links{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
+.ab-link{font-family:'Share Tech Mono',monospace;font-size:.7rem;text-decoration:none;padding:5px 12px;border-radius:4px;transition:all .2s;}
+.ab-link.li{color:var(--cyan);border:1px solid rgba(6,182,212,.3);}
+.ab-link.li:hover{background:rgba(6,182,212,.1);}
+.ab-link.em{color:var(--lp);border:1px solid rgba(167,139,250,.3);}
+.ab-link.em:hover{background:rgba(167,139,250,.1);}
+.ab-link.gh{color:var(--white);border:1px solid var(--border);}
+.ab-link.gh:hover{background:rgba(255,255,255,.05);}
+.ab-link.bt{color:var(--purple);border:1px solid rgba(124,58,237,.3);cursor:pointer;}
+.ab-link.bt:hover{background:rgba(124,58,237,.1);}
+
+/* ── TIMELINE ── */
+.tl{display:flex;flex-direction:column;gap:22px;}
+.tli{border-left:2px solid var(--purple);padding-left:18px;position:relative;}
+.tli::before{content:'';position:absolute;left:-6px;top:6px;width:10px;height:10px;border-radius:50%;background:var(--purple);box-shadow:0 0 10px var(--purple);}
+.td{font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--cyan);margin-bottom:3px;}
+.tr{font-weight:600;font-size:.92rem;color:var(--white);margin-bottom:2px;}
+.tc{font-family:'Share Tech Mono',monospace;font-size:.72rem;color:var(--lp);margin-bottom:8px;}
+.tb2{list-style:none;display:flex;flex-direction:column;gap:6px;}
+.tb2 li{font-size:.78rem;color:var(--gray);line-height:1.55;display:flex;gap:7px;}
+.tb2 li::before{content:'▸';color:var(--purple);flex-shrink:0;margin-top:1px;}
+
+/* ── PROJECTS ── */
+.pgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:14px;}
+.pc{background:rgba(13,13,40,.85);border:1px solid var(--border);border-radius:8px;padding:15px;transition:all .3s;position:relative;overflow:hidden;}
+.pc::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--purple),var(--cyan));transform:scaleX(0);transition:transform .3s;}
+.pc:hover{border-color:var(--purple);transform:translateY(-2px);}.pc:hover::before{transform:scaleX(1);}
+.pc.wip{border-color:rgba(6,182,212,.25);}
+.pbadge{display:inline-flex;align-items:center;gap:3px;font-family:'Share Tech Mono',monospace;font-size:.58rem;padding:2px 8px;border-radius:20px;margin-bottom:9px;}
+.bwip{background:rgba(6,182,212,.1);border:1px solid rgba(6,182,212,.4);color:var(--cyan);}
+.bdone{background:rgba(124,58,237,.1);border:1px solid rgba(124,58,237,.4);color:var(--lp);}
+.bpub{background:rgba(39,201,63,.1);border:1px solid rgba(39,201,63,.4);color:#27c93f;}
+.ptitle{font-family:'Share Tech Mono',monospace;font-size:.82rem;color:var(--white);margin-bottom:7px;line-height:1.4;}
+.pdesc{font-size:.76rem;color:var(--gray);line-height:1.6;margin-bottom:10px;}
+.pstack{display:flex;flex-wrap:wrap;gap:4px;}
+.tt{font-family:'Share Tech Mono',monospace;font-size:.58rem;padding:2px 7px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.2);border-radius:3px;color:var(--lp);}
+.pubcard{background:rgba(13,13,40,.85);border:1px solid rgba(6,182,212,.2);border-left:3px solid var(--cyan);border-radius:8px;padding:13px 15px;margin-top:18px;}
+.pbt{font-size:.8rem;color:var(--white);margin-bottom:5px;line-height:1.5;}
+.pbj{font-family:'Share Tech Mono',monospace;font-size:.65rem;color:var(--cyan);margin-bottom:4px;}
+.pbl{font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--purple);text-decoration:none;}
+.pbl:hover{color:var(--lp);text-decoration:underline;}
+
+/* ── EDUCATION ── */
+.ecards{display:flex;flex-direction:column;gap:11px;}
+.ec{background:rgba(13,13,40,.85);border:1px solid var(--border);border-radius:8px;padding:13px 15px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;transition:border-color .3s;}
+.ec:hover{border-color:var(--purple);}
+.ed{font-weight:600;font-size:.88rem;color:var(--white);margin-bottom:3px;}
+.es{font-family:'Share Tech Mono',monospace;font-size:.7rem;color:var(--lp);margin-bottom:2px;}
+.ey{font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--gray);}
+.eg{font-family:'Orbitron',monospace;font-size:1rem;font-weight:700;color:var(--cyan);white-space:nowrap;text-align:right;}
+.egl{font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--gray);text-align:right;}
+
+/* ── SKILLS ── */
+.scats{display:flex;flex-direction:column;gap:18px;}
+.sct{font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--cyan);margin-bottom:9px;display:flex;align-items:center;gap:5px;}
+.sct::before{content:'//';color:var(--purple);}
+.stags{display:flex;flex-wrap:wrap;gap:6px;}
+.stag{font-family:'Share Tech Mono',monospace;font-size:.68rem;padding:5px 10px;background:rgba(124,58,237,.07);border:1px solid rgba(124,58,237,.2);border-radius:4px;color:var(--white);transition:all .2s;cursor:default;}
+.stag:hover{background:rgba(124,58,237,.2);border-color:var(--purple);box-shadow:0 0 8px rgba(124,58,237,.25);}
+
+/* ── CONTACT ── */
+.citems{display:flex;flex-direction:column;gap:13px;}
+.ci{background:rgba(13,13,40,.85);border:1px solid var(--border);border-radius:8px;padding:15px 18px;display:flex;align-items:center;gap:15px;transition:all .3s;text-decoration:none;cursor:pointer;}
+.ci:hover{border-color:var(--purple);background:rgba(124,58,237,.05);transform:translateX(5px);box-shadow:-4px 0 0 var(--purple);}
+.cico{font-size:1.5rem;width:40px;text-align:center;}
+.clbl{font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--purple);margin-bottom:3px;}
+.cval{font-family:'Share Tech Mono',monospace;font-size:.82rem;color:var(--white);}
+.cterm{font-family:'Share Tech Mono',monospace;font-size:.62rem;color:var(--gray);margin-top:2px;}
+.cact{margin-left:auto;font-family:'Share Tech Mono',monospace;font-size:.58rem;color:var(--cyan);padding:4px 9px;border:1px solid rgba(6,182,212,.3);border-radius:4px;white-space:nowrap;flex-shrink:0;transition:all .2s;}
+.cstatus{margin-top:18px;padding:13px 15px;background:rgba(124,58,237,.04);border:1px solid rgba(124,58,237,.15);border-radius:8px;font-family:'Share Tech Mono',monospace;font-size:.68rem;color:var(--gray);line-height:1.9;}
+.cstatus .hl{color:var(--purple);}
+
+/* ── ROBOT ANIMATION ── */
+#robot-screen{
+  position:absolute;inset:0;background:rgba(8,8,22,.97);z-index:20;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;
+  animation:robot-in .4s ease;
+}
+@keyframes robot-in{from{opacity:0;transform:scale(.8);}to{opacity:1;transform:scale(1);}}
+.robot{display:flex;flex-direction:column;align-items:center;gap:0;}
+.r-ant{width:4px;height:18px;background:linear-gradient(180deg,var(--cyan),var(--purple));border-radius:2px;position:relative;animation:ant-bob 1.5s ease-in-out infinite alternate;}
+.r-ant::after{content:'';position:absolute;top:-5px;left:-3px;width:10px;height:10px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan);}
+@keyframes ant-bob{from{transform:rotate(-8deg);}to{transform:rotate(8deg);}}
+.r-head{width:60px;height:48px;background:linear-gradient(135deg,var(--purple),var(--indigo));border-radius:10px;border:2px solid var(--lp);position:relative;box-shadow:0 0 20px rgba(124,58,237,.5);}
+.r-eyes{display:flex;justify-content:space-around;padding:12px 8px 0;}
+.r-eye{width:12px;height:12px;background:var(--cyan);border-radius:50%;box-shadow:0 0 8px var(--cyan);animation:blink 3s ease-in-out infinite;}
+@keyframes blink{0%,88%,100%{transform:scaleY(1);}92%{transform:scaleY(.1);}}
+.r-mouth{width:22px;height:4px;background:var(--cyan);margin:7px auto 0;border-radius:2px;box-shadow:0 0 6px var(--cyan);animation:smile 2s ease-in-out infinite alternate;}
+@keyframes smile{from{width:14px;}to{width:26px;}
+}
+.r-body-row{display:flex;align-items:center;gap:4px;}
+.r-arm{width:10px;height:32px;background:linear-gradient(180deg,var(--purple),var(--indigo));border-radius:5px;border:1px solid var(--lp);}
+.r-arm.l{animation:wave-l 1s ease-in-out infinite alternate;transform-origin:top center;}
+.r-arm.r{animation:wave-r 1s ease-in-out .3s infinite alternate;transform-origin:top center;}
+@keyframes wave-l{from{transform:rotate(-30deg);}to{transform:rotate(20deg);}}
+@keyframes wave-r{from{transform:rotate(30deg);}to{transform:rotate(-20deg);}}
+.r-torso{width:50px;height:38px;background:linear-gradient(135deg,var(--indigo),#2a1a6e);border-radius:6px;border:2px solid var(--lp);display:flex;align-items:center;justify-content:center;}
+.r-chest-light{width:12px;height:12px;background:var(--cyan);border-radius:50%;box-shadow:0 0 10px var(--cyan);animation:chest-pulse 1s ease-in-out infinite alternate;}
+@keyframes chest-pulse{from{opacity:.6;transform:scale(.8);}to{opacity:1;transform:scale(1.1);}}
+.r-legs-row{display:flex;gap:8px;}
+.r-leg{width:12px;height:20px;background:linear-gradient(180deg,var(--indigo),var(--purple));border-radius:4px;border:1px solid var(--lp);}
+.r-label{font-family:'Orbitron',monospace;font-size:.75rem;color:var(--lp);letter-spacing:3px;animation:label-pulse 1s ease-in-out infinite alternate;}
+@keyframes label-pulse{from{opacity:.6;}to{opacity:1;text-shadow:0 0 10px rgba(167,139,250,.8);}}
+
+/* ── FLOATING BG ROBOT ── */
+#bg-robot{position:absolute;right:7%;bottom:12%;z-index:2;opacity:.38;pointer-events:none;animation:bg-float 5s ease-in-out infinite;filter:drop-shadow(0 0 18px rgba(124,58,237,.5));}
+@keyframes bg-float{0%,100%{transform:translateY(0) rotate(-2deg);}50%{transform:translateY(-22px) rotate(2deg);}}
+.bgr{display:flex;flex-direction:column;align-items:center;gap:0;}
+.bgr-ant{width:5px;height:22px;background:linear-gradient(180deg,var(--cyan),var(--purple));border-radius:3px;position:relative;animation:bgr-ant 3s ease-in-out infinite alternate;}
+.bgr-ant::after{content:'';position:absolute;top:-7px;left:-4px;width:13px;height:13px;border-radius:50%;background:radial-gradient(circle,var(--cyan) 40%,rgba(6,182,212,.3) 100%);box-shadow:0 0 12px var(--cyan);}
+@keyframes bgr-ant{from{transform:rotate(-12deg);}to{transform:rotate(12deg);}}
+.bgr-head{width:80px;height:64px;background:linear-gradient(135deg,rgba(124,58,237,.8),rgba(79,70,229,.7));border-radius:14px;border:2px solid var(--lp);position:relative;box-shadow:0 0 20px rgba(124,58,237,.4);}
+.bgr-visor{position:absolute;top:14px;left:10px;right:10px;height:18px;background:linear-gradient(90deg,rgba(6,182,212,.15),rgba(6,182,212,.6),rgba(6,182,212,.15));border-radius:4px;border:1px solid rgba(6,182,212,.5);overflow:hidden;}
+.bgr-visor::after{content:'';position:absolute;top:0;bottom:0;width:40%;background:rgba(255,255,255,.1);animation:visor-scan 2s linear infinite;}
+@keyframes visor-scan{from{left:-40%;}to{left:140%;}}
+.bgr-mouth-row{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:5px;}
+.bgr-tooth{width:8px;height:6px;background:var(--cyan);border-radius:2px;opacity:.8;}
+.bgr-body-row{display:flex;align-items:flex-start;gap:5px;}
+.bgr-arm{width:14px;height:44px;background:linear-gradient(180deg,rgba(124,58,237,.8),rgba(79,70,229,.6));border-radius:7px;border:1px solid var(--lp);}
+.bgr-arm.l{animation:bgr-arm-l 4s ease-in-out infinite alternate;transform-origin:top center;}
+.bgr-arm.r{animation:bgr-arm-r 4s ease-in-out infinite alternate;transform-origin:top center;}
+@keyframes bgr-arm-l{from{transform:rotate(-25deg);}to{transform:rotate(15deg);}}
+@keyframes bgr-arm-r{from{transform:rotate(25deg);}to{transform:rotate(-15deg);}}
+.bgr-torso{width:64px;height:52px;background:linear-gradient(135deg,rgba(79,70,229,.8),rgba(45,35,120,.7));border-radius:8px;border:2px solid var(--lp);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:4px;}
+.bgr-panel{display:flex;gap:5px;}
+.bgr-dot{width:9px;height:9px;border-radius:50%;animation:bgr-dot-pulse 2s ease-in-out infinite;}
+.bgr-dot:nth-child(1){background:var(--cyan);box-shadow:0 0 8px var(--cyan);}
+.bgr-dot:nth-child(2){background:var(--purple);box-shadow:0 0 8px var(--purple);animation-delay:.4s;}
+.bgr-dot:nth-child(3){background:var(--lp);box-shadow:0 0 8px var(--lp);animation-delay:.8s;}
+@keyframes bgr-dot-pulse{0%,100%{transform:scale(.8);opacity:.5;}50%{transform:scale(1.2);opacity:1;}}
+.bgr-bar{width:40px;height:4px;background:linear-gradient(90deg,var(--purple),var(--cyan));border-radius:2px;animation:bgr-bar 3s ease-in-out infinite alternate;}
+@keyframes bgr-bar{from{width:20px;}to{width:44px;}}
+.bgr-legs-row{display:flex;gap:10px;}
+.bgr-leg{width:16px;height:26px;background:linear-gradient(180deg,rgba(79,70,229,.8),rgba(124,58,237,.5));border-radius:6px;border:1px solid var(--lp);}
+.bgr-foot-row{display:flex;gap:6px;margin-top:-2px;}
+.bgr-foot{width:20px;height:8px;background:rgba(124,58,237,.6);border-radius:4px;border:1px solid var(--lp);}
+/* left small robot */
+#bg-robot2{position:absolute;left:5%;top:30%;z-index:2;opacity:.22;pointer-events:none;animation:bg-float2 7s ease-in-out infinite;filter:drop-shadow(0 0 10px rgba(6,182,212,.4));}
+@keyframes bg-float2{0%,100%{transform:translateY(0) rotate(3deg);}50%{transform:translateY(-16px) rotate(-3deg);}}
+
+/* ── CHATBOT ── */
+.chat-wrap{display:flex;flex-direction:column;height:500px;max-height:65vh;overflow:hidden;position:relative;}
+.qqs{padding:8px 14px;display:flex;flex-wrap:wrap;gap:5px;border-bottom:1px solid var(--border);flex-shrink:0;}
+.qq{font-family:'Share Tech Mono',monospace;font-size:.58rem;padding:4px 10px;background:rgba(124,58,237,.08);border:1px solid rgba(124,58,237,.22);border-radius:20px;color:var(--lp);cursor:pointer;transition:all .2s;white-space:nowrap;}
+.qq:hover{background:rgba(124,58,237,.2);border-color:var(--purple);}
+.msgs{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:11px;}
+.msgs::-webkit-scrollbar{width:3px;}
+.msgs::-webkit-scrollbar-thumb{background:var(--purple);border-radius:2px;}
+.msg{display:flex;gap:9px;max-width:88%;}
+.msg.u{flex-direction:row-reverse;align-self:flex-end;}
+.msg.b{align-self:flex-start;}
+.mav{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Share Tech Mono',monospace;font-size:.55rem;flex-shrink:0;}
+.msg.b .mav{background:linear-gradient(135deg,var(--purple),var(--cyan));color:#fff;}
+.msg.u .mav{background:rgba(124,58,237,.2);border:1px solid var(--border);color:var(--lp);}
+.mb{padding:9px 13px;border-radius:10px;font-size:.8rem;line-height:1.6;}
+.msg.b .mb{background:rgba(13,13,43,.95);border:1px solid var(--border);color:var(--white);border-radius:2px 10px 10px 10px;}
+.msg.u .mb{background:rgba(124,58,237,.18);border:1px solid rgba(124,58,237,.3);color:var(--lp);border-radius:10px 2px 10px 10px;}
+.cir{display:flex;gap:4px;align-items:center;padding:11px 13px;background:rgba(13,13,43,.95);border:1px solid var(--border);border-radius:2px 10px 10px 10px;width:fit-content;}
+.cd{width:6px;height:6px;background:var(--purple);border-radius:50%;animation:cbounce 1.2s ease-in-out infinite;}
+.cd:nth-child(2){animation-delay:.2s;}.cd:nth-child(3){animation-delay:.4s;}
+@keyframes cbounce{0%,60%,100%{transform:translateY(0);opacity:.5;}30%{transform:translateY(-6px);opacity:1;}}
+.cinput-row{display:flex;gap:7px;padding:11px 14px;border-top:1px solid var(--border);background:rgba(13,13,43,.95);flex-shrink:0;}
+.cinput{flex:1;background:rgba(5,5,16,.95);border:1px solid var(--border);border-radius:6px;padding:8px 11px;color:var(--white);font-family:'Share Tech Mono',monospace;font-size:.78rem;outline:none;transition:border-color .2s;}
+.cinput:focus{border-color:var(--purple);}
+.cinput::placeholder{color:var(--gray);opacity:.6;}
+.csend{background:linear-gradient(135deg,var(--purple),var(--indigo));border:none;border-radius:6px;padding:8px 14px;color:#fff;font-family:'Share Tech Mono',monospace;font-size:.78rem;cursor:pointer;transition:all .2s;flex-shrink:0;}
+.csend:hover{box-shadow:0 0 15px rgba(124,58,237,.5);transform:scale(1.04);}
+</style>
+</head>
+<body>
+<div id="cur"></div>
+<div id="curd"></div>
+<canvas id="pcv"></canvas>
+
+<!-- ════════════ LANDING ════════════ -->
+<div id="landing">
+
+  <!-- Floating background robot RIGHT -->
+  <div id="bg-robot">
+    <div class="bgr">
+      <div class="bgr-ant"></div>
+      <div class="bgr-head">
+        <div class="bgr-visor"></div>
+        <div class="bgr-mouth-row"><div class="bgr-tooth"></div><div class="bgr-tooth"></div><div class="bgr-tooth"></div></div>
+      </div>
+      <div class="bgr-body-row">
+        <div class="bgr-arm l"></div>
+        <div class="bgr-torso">
+          <div class="bgr-panel"><div class="bgr-dot"></div><div class="bgr-dot"></div><div class="bgr-dot"></div></div>
+          <div class="bgr-bar"></div>
+        </div>
+        <div class="bgr-arm r"></div>
+      </div>
+      <div class="bgr-legs-row"><div class="bgr-leg"></div><div class="bgr-leg"></div></div>
+      <div class="bgr-foot-row"><div class="bgr-foot"></div><div class="bgr-foot"></div></div>
+    </div>
+  </div>
+
+  <!-- Floating background robot LEFT (tiny) -->
+  <div id="bg-robot2">
+    <div class="bgr" style="transform:scale(.55);">
+      <div class="bgr-ant"></div>
+      <div class="bgr-head"><div class="bgr-visor"></div></div>
+      <div class="bgr-body-row">
+        <div class="bgr-arm l"></div>
+        <div class="bgr-torso"><div class="bgr-panel"><div class="bgr-dot"></div><div class="bgr-dot"></div></div></div>
+        <div class="bgr-arm r"></div>
+      </div>
+      <div class="bgr-legs-row"><div class="bgr-leg"></div><div class="bgr-leg"></div></div>
+    </div>
+  </div>
+
+  <div id="monDrag">
+    <div class="monitor" id="monEl">
+      <div class="mon-screen" id="monScreen">
+        <div class="s-hdr" id="bootTxt">INITIALISING KHUSHI_RAI_OS...</div>
+        <div class="s-name">KHUSHI RAI</div>
+        <div class="s-sub">M.ENG COMPUTER VISION &amp; AI · AI ENGINEER</div>
+        <button class="enter-btn" onclick="enterDesk()"><span>⊳ CLICK TO KNOW ME</span></button>
+      </div>
+    </div>
+    <div class="mon-neck" id="monMoveHandle"></div>
+    <div class="mon-stand" id="monStand"></div>
+    <div class="mon-drag-hint">drag screen to spin · drag stand to move</div>
+  </div>
+
+  <div class="kb-wrap" id="kb">
+    <div class="kb" id="kbInner">
+      <div class="kr"><div class="k">ESC</div><div class="k">F1</div><div class="k">F2</div><div class="k">F3</div><div class="k">F4</div><div class="k">F5</div><div class="k">F6</div><div class="k">F7</div><div class="k">F8</div><div class="k">F9</div><div class="k">F10</div><div class="k">F11</div><div class="k">F12</div></div>
+      <div class="kr"><div class="k">`</div><div class="k">1</div><div class="k">2</div><div class="k">3</div><div class="k">4</div><div class="k">5</div><div class="k">6</div><div class="k">7</div><div class="k">8</div><div class="k">9</div><div class="k">0</div><div class="k">-</div><div class="k">=</div><div class="k w">DEL</div></div>
+      <div class="kr"><div class="k w">TAB</div><div class="k">Q</div><div class="k">W</div><div class="k">E</div><div class="k">R</div><div class="k">T</div><div class="k">Y</div><div class="k">U</div><div class="k">I</div><div class="k">O</div><div class="k">P</div><div class="k">[</div><div class="k">]</div></div>
+      <div class="kr"><div class="k ww">CAPS</div><div class="k">A</div><div class="k">S</div><div class="k">D</div><div class="k">F</div><div class="k">G</div><div class="k">H</div><div class="k">J</div><div class="k">K</div><div class="k">L</div><div class="k">;</div><div class="k">'</div><div class="k w">ENTER</div></div>
+      <div class="kr"><div class="k ww">SHIFT</div><div class="k">Z</div><div class="k">X</div><div class="k">C</div><div class="k">V</div><div class="k">B</div><div class="k">N</div><div class="k">M</div><div class="k">,</div><div class="k">.</div><div class="k">/</div><div class="k ww">SHIFT</div></div>
+      <div class="kr"><div class="k w">CTRL</div><div class="k w">ALT</div><div class="k sp">SPACE</div><div class="k w">ALT</div><div class="k w">CTRL</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ DESKTOP ════════════ -->
+<div id="desk">
+  <div id="dragHint">🖱️ Tip: You can drag the folders, monitor &amp; keyboard — everything moves!</div>
+  <div class="dbg"></div>
+  <div class="dgrid"></div>
+  <div class="topbar">
+    <div class="tb-l">⬡ KHUSHI RAI OS</div>
+    <div class="tb-r">
+      <button class="home-btn" onclick="goHome()" title="Press ESC to return home">⏻ HOME</button>
+      <span>AI ENGINEER · IRE</span>
+      <span id="clk">--:--:--</span>
+    </div>
+  </div>
+  <div class="icons" id="iconArea"></div>
+  <div class="tbar">
+    <span style="font-family:'Orbitron',monospace;font-size:.6rem;color:var(--lp);margin-right:6px;flex-shrink:0;">⬡</span>
+    <div class="ti" id="ti-about" onclick="ow('about')">👤 About</div>
+    <div class="ti" id="ti-exp" onclick="ow('exp')">💼 Exp</div>
+    <div class="ti" id="ti-proj" onclick="ow('proj')">🚀 Projects</div>
+    <div class="ti" id="ti-edu" onclick="ow('edu')">🎓 Edu</div>
+    <div class="ti" id="ti-skills" onclick="ow('skills')">⚡ Skills</div>
+    <div class="ti" id="ti-contact" onclick="ow('contact')">📡 Contact</div>
+    <div class="ti" id="ti-chat" onclick="ow('chat')">🤖 Chat</div>
+  </div>
+</div>
+
+<div class="overlay" id="ov" onclick="ca()"></div>
+
+<!-- ════════════ WINDOWS ════════════ -->
+
+<!-- ABOUT -->
+<div class="win" id="w-about">
+  <div class="wtb"><div class="wt">// ABOUT_ME.exe</div><div class="wbtns"><button class="wb mn"></button><button class="wb mx"></button><button class="wb cl"></button></div></div>
+  <div class="wc">
+    <div class="ab-hdr">
+      <div class="av">KR</div>
+      <div>
+        <div class="ab-name">Khushi Rai</div>
+        <div class="ab-tag">&gt; Software &amp; CV/AI Engineer // University of Limerick</div>
+        <a href="https://www.indjcst.com/archives/10.59256/indjcst.20250401033" target="_blank" rel="noopener" style="text-decoration:none;"><span class="badge-pub" style="cursor:pointer;">📄 IEEE Published · ISSN 2583-5300 ↗</span></a>
+      </div>
+    </div>
+    <div class="ab-p" style="margin-bottom:12px;">Software and CV/AI engineer finishing an MEng in Computer Vision &amp; AI at UL. I enjoy the messy, satisfying work of turning models into real products — deploying them, making them fast and reliable enough to actually trust.</div>
+    <div class="ab-p" style="margin-bottom:12px;">Built and shipped applications across software, web and cloud internships using <span style="color:var(--lp);">Python, Java, JavaScript/Node, React</span> and <span style="color:var(--lp);">AWS</span>. Most at home in Python, and genuinely happy whether I'm deep in a vision model or building the system around it.</div>
+    <div class="ab-p" style="margin-bottom:16px;color:var(--lp);">Currently looking for my next role in Ireland — if you're hiring or just want to talk shop, I'd love to hear from you.</div>
+    <div class="st">QUICK FACTS</div>
+    <div class="quick-facts">
+      <div class="qf"><span>location:</span> Limerick, Ireland</div>
+      <div class="qf"><span>graduating:</span> September 2026</div>
+      <div class="qf"><span>focus:</span> CV/AI · Cloud · Full-Stack</div>
+      <div class="qf"><span>research:</span> Weld Defect Detection (YOLOv11)</div>
+    </div>
+    <div class="st" style="margin-top:18px;">CONNECT</div>
+    <div class="ab-links">
+      <a class="ab-link li" href="https://linkedin.com/in/khushi-rai-688dp" target="_blank" rel="noopener">💼 LinkedIn</a>
+      <a class="ab-link em" href="mailto:khushirai688@gmail.com">📧 Email</a>
+      <a class="ab-link gh" href="https://github.com/khushiraiii" target="_blank" rel="noopener">⬡ GitHub</a>
+      <span class="ab-link bt" onclick="cw('about');ow('chat')">🤖 Chat with Khushi</span>
+    </div>
+  </div>
+</div>
+
+<!-- EXPERIENCE -->
+<div class="win" id="w-exp">
+  <div class="wtb"><div class="wt">// EXPERIENCE.log</div><div class="wbtns"><button class="wb mn"></button><button class="wb mx"></button><button class="wb cl"></button></div></div>
+  <div class="wc">
+    <div class="st">WORK EXPERIENCE</div>
+    <div class="tl">
+      <div class="tli">
+        <div class="td">Dec 2024 – May 2025</div>
+        <div class="tr">Cloud Application Developer Intern</div>
+        <div class="tc">Skill India – PMKVY 4.0</div>
+        <ul class="tb2">
+          <li>Achieved Grade B (NSQF Level 5, NASSCOM-certified) designing and deploying secure, fault-tolerant cloud applications end-to-end across multi-environment deployments.</li>
+          <li>Implemented high-availability patterns across AWS Lambda, S3, SQS, DynamoDB, and API Gateway, validated via structured testing and CloudWatch observability.</li>
+        </ul>
+      </div>
+      <div class="tli">
+        <div class="td">Oct 2023 – Nov 2023</div>
+        <div class="tr">Web Developer Intern</div>
+        <div class="tc">TekkyBench</div>
+        <ul class="tb2">
+          <li>Led a cross-functional team of designers and developers to build and maintain responsive web pages, improving content delivery reliability.</li>
+          <li>Drove workflow automation by coordinating across teams to streamline content pipelines.</li>
+        </ul>
+      </div>
+      <div class="tli">
+        <div class="td">May 2023 – Jun 2023</div>
+        <div class="tr">Software Developer Intern</div>
+        <div class="tc">Flashflow Technologies</div>
+        <ul class="tb2">
+          <li>Built and validated RESTful APIs in Java Spring Boot and MongoDB, automating CRUD operations and improving backend system efficiency.</li>
+          <li>Enforced API correctness through systematic Postman testing and modular database design.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PROJECTS -->
+<div class="win" id="w-proj">
+  <div class="wtb"><div class="wt">// PROJECTS.dir</div><div class="wbtns"><button class="wb mn"></button><button class="wb mx"></button><button class="wb cl"></button></div></div>
+  <div class="wc">
+    <div class="st">PROJECTS</div>
+    <div class="pgrid">
+      <div class="pc wip">
+        <div class="pbadge bwip">⚡ IN PROGRESS</div>
+        <div class="ptitle">Weld Defect Detection — YOLOv11 + Attention Mechanisms</div>
+        <div class="pdesc">Defect detection pipeline on the LoHi-Weld dataset. CNN classifier + YOLOv11 with attention mechanisms for low-contrast defect regions. Focal loss for class imbalance.</div>
+        <div class="pstack"><span class="tt">Python</span><span class="tt">PyTorch</span><span class="tt">YOLOv11</span><span class="tt">OpenCV</span><span class="tt">CNNs</span><span class="tt">NumPy</span></div>
+      </div>
+      <div class="pc">
+        <div class="pbadge bdone">✓ COMPLETE</div>
+        <div class="ptitle">AI-Powered Resume Scanner &amp; ATS Checker</div>
+        <div class="pdesc">Full-stack serverless SaaS delivering ATS scores (0–100), hire/no-hire recommendations, and skill gap analysis within 30 seconds on AWS.</div>
+        <div class="pstack"><span class="tt">Python</span><span class="tt">Mistral AI</span><span class="tt">AWS Lambda</span><span class="tt">DynamoDB</span><span class="tt">React.js</span></div>
+      </div>
+      <div class="pc">
+        <div class="pbadge bdone">✓ COMPLETE</div>
+        <div class="ptitle">Real-Time Face Mask Detection (Edge AI)</div>
+        <div class="pdesc">On-device TFLite inference with &lt;1s latency on OpenMV IMXRT1060 edge camera. Wi-Fi upload to Flask backend with automatic Telegram alerts.</div>
+        <div class="pstack"><span class="tt">Python</span><span class="tt">TFLite</span><span class="tt">OpenMV</span><span class="tt">Flask</span><span class="tt">EdgeImpulse</span></div>
+      </div>
+      <div class="pc">
+        <div class="pbadge bdone">✓ COMPLETE</div>
+        <div class="ptitle">AI-Driven Building Damage Detection</div>
+        <div class="pdesc">Post-disaster satellite imagery analysis using deep learning (CNNs + OpenCV), replacing manual damage assessment with a scalable ML pipeline.</div>
+        <div class="pstack"><span class="tt">Python</span><span class="tt">CNNs</span><span class="tt">OpenCV</span><span class="tt">PIL</span><span class="tt">REST APIs</span></div>
+      </div>
+      <div class="pc">
+        <div class="pbadge bpub">✓ PUBLISHED</div>
+        <div class="ptitle"><a href="https://www.indjcst.com/archives/10.59256/indjcst.20250401033" target="_blank" rel="noopener" style="color:var(--white);text-decoration:none;">Voting System — Ethereum Blockchain ↗</a></div>
+        <div class="pdesc">Immutable smart contracts on Ethereum eliminating fraud in traditional voting. Results validated transparently on-chain. Published in IEEE-indexed journal.</div>
+        <div class="pstack"><span class="tt">Solidity</span><span class="tt">Ethereum</span><span class="tt">Web3.js</span><span class="tt">MetaMask</span><span class="tt">Ganache</span></div>
+      </div>
+      <div class="pc">
+        <div class="pbadge bdone">✓ COMPLETE</div>
+        <div class="ptitle">Fluid Flow Simulation</div>
+        <div class="pdesc">Fluid dynamics between parallel plates via numerical methods (1D Navier-Stokes). Visualised with Matplotlib &amp; Unity.</div>
+        <div class="pstack"><span class="tt">Python</span><span class="tt">NumPy</span><span class="tt">Matplotlib</span><span class="tt">SciPy</span><span class="tt">Unity</span></div>
+      </div>
+    </div>
+    <div class="pubcard">
+      <a href="https://www.indjcst.com/archives/10.59256/indjcst.20250401033" target="_blank" rel="noopener" style="text-decoration:none;">
+        <div class="pbt" style="color:var(--cyan);text-decoration:underline;cursor:pointer;">📄 Implementation Paper on Voting System Using Ethereum Blockchain and Ganache Tool ↗</div>
+      </a>
+      <div class="pbj" style="margin-top:5px;">Indian Journal of CS &amp; Technology · ISSN: 2583-5300 · Vol.4 Issue 1 · Jan–Apr 2025 · PP: 209–215</div>
+      <div style="display:flex;gap:12px;margin-top:6px;">
+        <a class="pbl" href="https://www.indjcst.com/archives/10.59256/indjcst.20250401033" target="_blank" rel="noopener">⊳ Read Paper — indjcst.com</a>
+        <a class="pbl" href="https://www.doi.org/10.59256/indjcst.20250401033" target="_blank" rel="noopener" style="opacity:.7;">⊳ DOI link</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EDUCATION -->
+<div class="win" id="w-edu">
+  <div class="wtb"><div class="wt">// EDUCATION.json</div><div class="wbtns"><button class="wb mn"></button><button class="wb mx"></button><button class="wb cl"></button></div></div>
+  <div class="wc">
+    <div class="st">EDUCATION</div>
+    <div class="ecards">
+      <div class="ec"><div><div class="ed">M.Eng — Computer Vision &amp; Artificial Intelligence</div><div class="es">University of Limerick, Ireland</div><div class="ey">2025 – 2026</div></div><div><div class="eg">3.48</div><div class="egl">CGPA / 4.0</div></div></div>
+      <div class="ec"><div><div class="ed">B.E — Computer Science &amp; Design</div><div class="es">DSATM, Bangalore</div><div class="ey">2021 – 2025</div></div><div><div class="eg">8.45</div><div class="egl">CGPA / 10.0</div></div></div>
+      <div class="ec"><div><div class="ed">KSEEB — Pre-University</div><div class="es">Sri Chaithanya PU College</div><div class="ey">2019 – 2021</div></div><div><div class="eg">92.3%</div><div class="egl">PERCENTAGE</div></div></div>
+      <div class="ec"><div><div class="ed">CBSE — Secondary School</div><div class="es">Sharada Vidyalaya School</div><div class="ey">2007 – 2019</div></div><div><div class="eg">90.2%</div><div class="egl">PERCENTAGE</div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- SKILLS -->
+<div class="win" id="w-skills">
+  <div class="wtb"><div class="wt">// SKILLS.config</div><div class="wbtns"><button class="wb mn"></button><button class="wb mx"></button><button class="wb cl"></button></div></div>
+  <div class="wc">
+    <div class="st">TECH STACK</div>
+    <div class="scats">
+      <div><div class="sct">Languages</div><div class="stags"><span class="stag">Python</span><span class="stag">Java</span><span class="stag">JavaScript</span><span class="stag">SQL</span><span class="stag">C++</span><span class="stag">R</span><span class="stag">HTML / CSS</span></div></div>
+      <div><div class="sct">ML / AI / Computer Vision</div><div class="stags"><span class="stag">PyTorch</span><span class="stag">TensorFlow Lite</span><span class="stag">Scikit-learn</span><span class="stag">CNNs</span><span class="stag">YOLOv11</span><span class="stag">OpenCV</span><span class="stag">Mistral AI</span><span class="stag">LLM Integration</span><span class="stag">Prompt Engineering</span><span class="stag">Attention Mechanisms</span><span class="stag">Focal Loss</span><span class="stag">EdgeImpulse</span><span class="stag">Haar Cascade</span></div></div>
+      <div><div class="sct">Data &amp; Statistics</div><div class="stags"><span class="stag">Pandas</span><span class="stag">NumPy</span><span class="stag">Seaborn</span><span class="stag">Matplotlib</span><span class="stag">SciPy</span><span class="stag">Statistical Modelling</span></div></div>
+      <div><div class="sct">Cloud / DevOps</div><div class="stags"><span class="stag">AWS Lambda</span><span class="stag">S3</span><span class="stag">DynamoDB</span><span class="stag">SQS</span><span class="stag">API Gateway</span><span class="stag">CloudWatch</span><span class="stag">X-Ray</span><span class="stag">Cognito</span><span class="stag">IAM</span><span class="stag">Secrets Manager</span><span class="stag">Docker</span><span class="stag">Git</span></div></div>
+      <div><div class="sct">Frameworks &amp; Tools</div><div class="stags"><span class="stag">Flask</span><span class="stag">Spring Boot</span><span class="stag">React.js</span><span class="stag">Node.js</span><span class="stag">Solidity / Web3.js</span><span class="stag">AngularJS</span><span class="stag">Postman</span><span class="stag">Jupyter</span><span class="stag">OpenMV</span><span class="stag">Telegram Bot API</span></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- CONTACT -->
+<div class="win" id="w-contact">
+  <div class="wtb"><div class="wt">// CONTACT.sh</div><div class="wbtns"><button class="wb mn"></button><button class="wb mx"></button><button class="wb cl"></button></div></div>
+  <div class="wc">
+    <div class="st">ESTABLISH CONNECTION</div>
+    <div class="citems">
+      <a class="ci" href="https://linkedin.com/in/khushi-rai-688dp" target="_blank" rel="noopener">
+        <div class="cico">💼</div>
+        <div><div class="clbl">LINKEDIN</div><div class="cval">khushi-rai-688dp</div><div class="cterm">$ open linkedin.com/in/khushi-rai-688dp</div></div>
+        <div class="cact">→ CONNECT</div>
+      </a>
+      <a class="ci" href="mailto:khushirai688@gmail.com">
+        <div class="cico">📧</div>
+        <div><div class="clbl">EMAIL</div><div class="cval">khushirai688@gmail.com</div><div class="cterm">$ sendmail khushirai688@gmail.com</div></div>
+        <div class="cact">→ SEND</div>
+      </a>
+      <a class="ci" href="https://github.com/khushiraiii" target="_blank" rel="noopener">
+        <div class="cico">⬡</div>
+        <div><div class="clbl">GITHUB</div><div class="cval">github.com/khushiraiii</div><div class="cterm">$ git clone github.com/khushiraiii</div></div>
+        <div class="cact">→ EXPLORE</div>
+      </a>
+      <div class="ci" id="phoneRow" onclick="copyPhone()">
+        <div class="cico">📱</div>
+        <div><div class="clbl">MOBILE</div><div class="cval">+353 892 011 440</div><div class="cterm">$ call +353-892011440</div></div>
+        <div class="cact" id="copyTip">→ COPY</div>
+      </div>
+    </div>
+    <div class="cstatus">
+      <span class="hl">// STATUS:</span> Actively seeking graduate programmes, research roles &amp; AI/ML opportunities<br>
+      <span class="hl">// LOCATION:</span> Limerick, Ireland — available for remote &amp; hybrid roles<br>
+      <span class="hl">// RESPONSE:</span> Typically replies within 24 hours
+    </div>
+  </div>
+</div>
+
+<!-- CHAT -->
+<div class="win" id="w-chat">
+  <div class="wtb"><div class="wt">// KHUSHI_AI_ASSISTANT.bot</div><div class="wbtns"><button class="wb mn"></button><button class="wb mx"></button><button class="wb cl"></button></div></div>
+  <div class="chat-wrap" id="chatWrap">
+    <!-- Robot intro screen -->
+    <div id="robot-screen">
+      <div class="robot">
+        <div class="r-ant"></div>
+        <div class="r-head">
+          <div class="r-eyes"><div class="r-eye"></div><div class="r-eye"></div></div>
+          <div class="r-mouth"></div>
+        </div>
+        <div class="r-body-row">
+          <div class="r-arm l"></div>
+          <div class="r-torso"><div class="r-chest-light"></div></div>
+          <div class="r-arm r"></div>
+        </div>
+        <div class="r-legs-row"><div class="r-leg"></div><div class="r-leg"></div></div>
+      </div>
+      <div class="r-label">BOOTING ASSISTANT...</div>
+    </div>
+    <!-- Chat UI (hidden until robot done) -->
+    <div id="chatUI" style="display:none;flex-direction:column;flex:1;overflow:hidden;">
+      <div class="qqs">
+        <button class="qq" onclick="aq('background summary')">About Khushi</button>
+        <button class="qq" onclick="aq('projects built')">Projects</button>
+        <button class="qq" onclick="aq('skills tech stack')">Skills</button>
+        <button class="qq" onclick="aq('education degree')">Education</button>
+        <button class="qq" onclick="aq('work experience internship')">Experience</button>
+        <button class="qq" onclick="aq('availability graduation')">Availability</button>
+        <button class="qq" onclick="aq('why hire value')">Why hire her?</button>
+        <button class="qq" onclick="aq('contact email linkedin')">Contact</button>
+        <button class="qq" onclick="aq('fun facts hobbies')">🎉 Fun Facts</button>
+      </div>
+      <div class="msgs" id="chatMsgs">
+        <div class="msg b"><div class="mav">AI</div><div class="mb">👋 Hi! I'm Khushi's AI assistant. Ask me anything about her background, projects, skills, or availability!</div></div>
+      </div>
+      <div class="cinput-row">
+        <input class="cinput" id="ci" placeholder="Ask me anything about Khushi..." onkeypress="if(event.key==='Enter')sc()">
+        <button class="csend" onclick="sc()">SEND ▶</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ══ CURSOR ══
+const cur=document.getElementById('cur'),curd=document.getElementById('curd');
+document.addEventListener('mousemove',e=>{cur.style.left=e.clientX+'px';cur.style.top=e.clientY+'px';curd.style.left=e.clientX+'px';curd.style.top=e.clientY+'px';});
+document.addEventListener('mousedown',()=>cur.style.transform='translate(-50%,-50%) scale(.65)');
+document.addEventListener('mouseup',()=>cur.style.transform='translate(-50%,-50%) scale(1)');
+
+// ══ PARTICLES ══
+const pcv=document.getElementById('pcv'),ctx=pcv.getContext('2d');
+function rsz(){pcv.width=innerWidth;pcv.height=innerHeight;}rsz();window.addEventListener('resize',rsz);
+const pts=[];
+const cols=['rgba(124,58,237,','rgba(6,182,212,','rgba(79,70,229,','rgba(167,139,250,'];
+for(let i=0;i<90;i++)pts.push({x:Math.random()*innerWidth,y:Math.random()*innerHeight,r:Math.random()*1.4+.4,dx:(Math.random()-.5)*.35,dy:(Math.random()-.5)*.35,c:cols[0|Math.random()*4],a:Math.random()*.5+.1});
+function anim(){
+  ctx.clearRect(0,0,pcv.width,pcv.height);
+  pts.forEach(p=>{p.x+=p.dx;p.y+=p.dy;if(p.x<0)p.x=pcv.width;if(p.x>pcv.width)p.x=0;if(p.y<0)p.y=pcv.height;if(p.y>pcv.height)p.y=0;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle=p.c+p.a+')';ctx.fill();});
+  for(let i=0;i<pts.length;i++)for(let j=i+1;j<pts.length;j++){const dx=pts[i].x-pts[j].x,dy=pts[i].y-pts[j].y,d=Math.sqrt(dx*dx+dy*dy);if(d<110){ctx.beginPath();ctx.strokeStyle=`rgba(124,58,237,${.07*(1-d/110)})`;ctx.lineWidth=.5;ctx.moveTo(pts[i].x,pts[i].y);ctx.lineTo(pts[j].x,pts[j].y);ctx.stroke();}}
+  requestAnimationFrame(anim);
+}
+anim();
+
+// ══ BOOT TEXT ══
+const btxt=['INITIALISING KHUSHI_RAI_OS...','LOADING AI_MODULES... ✓','CONNECTING TO CLOUD... ✓','SYSTEM READY ■'];
+let bi=0;setInterval(()=>{bi=(bi+1)%btxt.length;document.getElementById('bootTxt').textContent=btxt[bi];},1800);
+
+// ══ KEYBOARD SLIDE ══
+setTimeout(()=>document.getElementById('kb').classList.add('in'),800);
+
+// ══ MONITOR: 360° ROTATION ON SCREEN DRAG ══
+const monEl=document.getElementById('monEl');
+const monScreen=document.getElementById('monScreen');
+let rotY=0, rotX=0;
+let isRotating=false, lastMX=0, lastMY=0;
+let isPassive=true;
+
+// Passive parallax on mouse move
+document.addEventListener('mousemove',e=>{
+  if(document.getElementById('desk').classList.contains('on'))return;
+  if(isRotating)return;
+  const mx=(e.clientX/innerWidth-.5)*50;
+  const my=(e.clientY/innerHeight-.5)*30;
+  monEl.style.transform=`perspective(700px) rotateY(${mx}deg) rotateX(${-my}deg)`;
+});
+
+// Screen drag = rotate 360
+monScreen.addEventListener('mousedown',e=>{
+  if(e.target.classList.contains('enter-btn')||e.target.closest('.enter-btn'))return;
+  isRotating=true;lastMX=e.clientX;lastMY=e.clientY;
+  monScreen.style.cursor='grabbing';
+  e.preventDefault();e.stopPropagation();
+});
+document.addEventListener('mousemove',e=>{
+  if(!isRotating)return;
+  const dx=e.clientX-lastMX, dy=e.clientY-lastMY;
+  rotY+=dx*0.7; rotX-=dy*0.4;
+  rotX=Math.max(-60,Math.min(60,rotX));
+  monEl.style.transform=`perspective(700px) rotateY(${rotY}deg) rotateX(${rotX}deg)`;
+  lastMX=e.clientX;lastMY=e.clientY;
+});
+document.addEventListener('mouseup',()=>{
+  if(isRotating){isRotating=false;monScreen.style.cursor='grab';}
+});
+
+// ══ MONITOR POSITION DRAG (via neck/stand) ══
+const monDrag=document.getElementById('monDrag');
+let isDraggingMon=false, monStartX=0, monStartY=0, monOffX=0, monOffY=0;
+
+function startMonMove(e){
+  // Make monDrag absolutely positioned
+  if(monDrag.style.position!=='fixed'){
+    const r=monDrag.getBoundingClientRect();
+    monDrag.style.position='fixed';
+    monDrag.style.left=r.left+'px';
+    monDrag.style.top=r.top+'px';
+    monDrag.style.transform='none';
+  }
+  isDraggingMon=true;
+  const r=monDrag.getBoundingClientRect();
+  monOffX=e.clientX-r.left;monOffY=e.clientY-r.top;
+  monDrag.classList.add('grabbing');
+  e.preventDefault();
+}
+document.getElementById('monMoveHandle').addEventListener('mousedown',startMonMove);
+document.getElementById('monStand').addEventListener('mousedown',startMonMove);
+document.addEventListener('mousemove',e=>{
+  if(!isDraggingMon)return;
+  monDrag.style.left=(e.clientX-monOffX)+'px';
+  monDrag.style.top=(e.clientY-monOffY)+'px';
+});
+document.addEventListener('mouseup',()=>{if(isDraggingMon){isDraggingMon=false;monDrag.classList.remove('grabbing');}});
+
+// ══ KEYBOARD POSITION DRAG ══
+const kb=document.getElementById('kb');
+let isDraggingKb=false, kbOffX=0, kbOffY=0;
+kb.addEventListener('mousedown',e=>{
+  if(kb.style.position!=='fixed'||!kb.style.left){
+    const r=kb.getBoundingClientRect();
+    kb.style.position='fixed';
+    kb.style.bottom='auto';
+    kb.style.left=r.left+'px';
+    kb.style.top=r.top+'px';
+    kb.style.transform='none';
+    kb.style.width=r.width+'px';
+  }
+  isDraggingKb=true;
+  const r=kb.getBoundingClientRect();
+  kbOffX=e.clientX-r.left;kbOffY=e.clientY-r.top;
+  kb.style.cursor='grabbing';
+  e.preventDefault();
+});
+document.addEventListener('mousemove',e=>{
+  if(!isDraggingKb)return;
+  kb.style.left=(e.clientX-kbOffX)+'px';
+  kb.style.top=(e.clientY-kbOffY)+'px';
+});
+document.addEventListener('mouseup',()=>{if(isDraggingKb){isDraggingKb=false;kb.style.cursor='move';}});
+
+// ══ ENTER DESKTOP ══
+function enterDesk(){
+  if(isRotating)return;
+  document.getElementById('landing').classList.add('exit');
+  setTimeout(()=>{
+    document.getElementById('landing').style.display='none';
+    document.getElementById('desk').classList.add('on');
+    const h=document.getElementById('dragHint');
+    h.classList.remove('show');void h.offsetWidth;h.classList.add('show');
+  },800);
+}
+
+// ══ RETURN HOME ══
+function goHome(){
+  ca();
+  document.getElementById('desk').classList.remove('on');
+  document.getElementById('desk').style.opacity='0';
+  document.getElementById('desk').style.pointerEvents='none';
+  const land=document.getElementById('landing');
+  land.style.display='flex';
+  land.style.opacity='0';
+  land.classList.remove('exit');
+  setTimeout(()=>{land.style.transition='opacity .6s';land.style.opacity='1';},50);
+  setTimeout(()=>{land.style.transition='';document.getElementById('desk').style.opacity='';document.getElementById('desk').style.pointerEvents='';},700);
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&document.getElementById('desk').classList.contains('on'))goHome();});
+
+// ══ CLOCK ══
+function tick(){document.getElementById('clk').textContent=new Date().toLocaleTimeString('en-GB',{hour12:false});}
+tick();setInterval(tick,1000);
+
+// ══ DRAGGABLE FOLDERS ══
+const folderDefs=[
+  {id:'about',icon:'👤',label:'About Me'},
+  {id:'exp',icon:'💼',label:'Experience'},
+  {id:'proj',icon:'🚀',label:'Projects'},
+  {id:'edu',icon:'🎓',label:'Education'},
+  {id:'skills',icon:'⚡',label:'Skills'},
+  {id:'contact',icon:'📡',label:'Contact'},
+  {id:'chat',icon:'🤖',label:'Chat with\nKhushi',cls:'chat'},
+];
+const iconArea=document.getElementById('iconArea');
+const COLS=4, GAP=20, ICON_W=82, ICON_H=92, PAD=24;
+folderDefs.forEach((f,i)=>{
+  const col=i%COLS, row=Math.floor(i/COLS);
+  const x=PAD+col*(ICON_W+GAP), y=PAD+row*(ICON_H+GAP);
+  const el=document.createElement('div');
+  el.className='fi'+(f.cls?' '+f.cls:'');
+  el.id='fi-'+f.id;
+  el.style.left=x+'px';el.style.top=y+'px';
+  el.innerHTML=`<div class="fii">${f.icon}</div><div class="fl">${f.label}</div>`;
+  let clickIntended=true, draggingThis=false, fStartX=0, fStartY=0, fOffX=0, fOffY=0;
+  el.addEventListener('mousedown',e=>{
+    clickIntended=true;draggingThis=false;
+    fStartX=e.clientX;fStartY=e.clientY;
+    const r=el.getBoundingClientRect();
+    fOffX=e.clientX-r.left;fOffY=e.clientY-r.top;
+    const onMove=ev=>{
+      const dist=Math.sqrt((ev.clientX-fStartX)**2+(ev.clientY-fStartY)**2);
+      if(dist>6){clickIntended=false;draggingThis=true;el.classList.add('dragging-fi');}
+      if(draggingThis){
+        const areaR=iconArea.getBoundingClientRect();
+        el.style.left=(ev.clientX-fOffX-areaR.left)+'px';
+        el.style.top=(ev.clientY-fOffY-areaR.top)+'px';
+      }
+    };
+    const onUp=ev=>{
+      document.removeEventListener('mousemove',onMove);
+      document.removeEventListener('mouseup',onUp);
+      el.classList.remove('dragging-fi');
+      if(clickIntended){ow(f.id);}
+      draggingThis=false;
+    };
+    document.addEventListener('mousemove',onMove);
+    document.addEventListener('mouseup',onUp);
+    e.preventDefault();
+  });
+  iconArea.appendChild(el);
+});
+
+// ══ WINDOWS ══
+const _ws={};      // state per window (keyed by win.id)
+let _dock=[];      // ordered list of minimised window ids (without 'w-' prefix)
+const DOCK_W=240,DOCK_GAP=8,DOCK_BOTTOM=54; // dock constants
+
+function _dockY(){return window.innerHeight-DOCK_BOTTOM-42;}
+
+function _placeDock(){
+  // Lay minimised windows side-by-side above taskbar
+  _dock.forEach((wid,i)=>{
+    const win=document.getElementById('w-'+wid);
+    win.style.left=(10+i*(DOCK_W+DOCK_GAP))+'px';
+    win.style.top=_dockY()+'px';
+    win.style.transform='none';
+    win.style.width=DOCK_W+'px';
+  });
+}
+
+function _syncOverlay(){
+  // Overlay visible only when at least one non-minimised window is open
+  const anyActive=Array.from(document.querySelectorAll('.win.open')).some(w=>!_ws[w.id]?.mined);
+  document.getElementById('ov').classList.toggle('show',anyActive);
+}
+
+function _initWin(win){
+  const id=win.id;
+  _ws[id]={dragging:false,resizing:false,sx:0,sy:0,sw:0,sh:0,pinned:false,maxed:false,mined:false,savedStyle:null};
+  const tb=win.querySelector('.wtb');
+  // Resize handle
+  const rh=document.createElement('div');rh.className='win-resize';win.appendChild(rh);
+
+  // ── helpers ──
+  function snapToAbs(){
+    const s=_ws[id];
+    if(!s.pinned||win.style.transform!=='none'){
+      const r=win.getBoundingClientRect();
+      win.style.left=r.left+'px';win.style.top=r.top+'px';win.style.transform='none';s.pinned=true;
+    }
+  }
+
+  // ── drag title bar ──
+  function startDrag(cx,cy){
+    const s=_ws[id];if(s.maxed||s.mined)return;
+    snapToAbs();
+    s.dragging=true;
+    s.sx=cx-parseFloat(win.style.left);s.sy=cy-parseFloat(win.style.top);
+    win.style.userSelect='none';win.style.zIndex=210;
+  }
+  function moveDrag(cx,cy){
+    const s=_ws[id];if(!s.dragging)return;
+    const nl=Math.max(0,Math.min(window.innerWidth-win.offsetWidth,cx-s.sx));
+    const nt=Math.max(0,Math.min(window.innerHeight-40,cy-s.sy));
+    win.style.left=nl+'px';win.style.top=nt+'px';
+  }
+  function endDrag(){_ws[id].dragging=false;win.style.userSelect='';}
+
+  tb.addEventListener('mousedown',e=>{
+    if(e.target.classList.contains('wb'))return;
+    // If minimised, clicking title bar restores the window
+    if(_ws[id].mined){_minWin(win);return;}
+    startDrag(e.clientX,e.clientY);e.preventDefault();
+  });
+  document.addEventListener('mousemove',e=>{moveDrag(e.clientX,e.clientY);});
+  document.addEventListener('mouseup',endDrag);
+  tb.addEventListener('touchstart',e=>{if(e.target.classList.contains('wb')||window.innerWidth<=640)return;const t=e.touches[0];startDrag(t.clientX,t.clientY);e.preventDefault();},{passive:false});
+  document.addEventListener('touchmove',e=>{const s=_ws[id];if(!s.dragging)return;const t=e.touches[0];moveDrag(t.clientX,t.clientY);e.preventDefault();},{passive:false});
+  document.addEventListener('touchend',endDrag);
+
+  // ── resize corner ──
+  rh.addEventListener('mousedown',e=>{
+    const s=_ws[id];if(s.maxed||s.mined)return;
+    snapToAbs();
+    s.resizing=true;s.sx=e.clientX;s.sy=e.clientY;s.sw=win.offsetWidth;s.sh=win.offsetHeight;
+    win.style.userSelect='none';e.stopPropagation();e.preventDefault();
+  });
+  document.addEventListener('mousemove',e=>{
+    const s=_ws[id];if(!s.resizing)return;
+    win.style.width=Math.max(340,s.sw+(e.clientX-s.sx))+'px';
+    win.style.maxHeight=Math.max(200,s.sh+(e.clientY-s.sy))+'px';
+  });
+  document.addEventListener('mouseup',()=>{_ws[id].resizing=false;win.style.userSelect='';});
+
+  // ── bring to front on click ──
+  win.addEventListener('mousedown',()=>{win.style.zIndex=210;},true);
+
+  // ── wire traffic-light buttons ──
+  const winId=id.replace('w-','');
+  const btns=win.querySelectorAll('.wb');
+  btns[0].title='Minimise';btns[1].title='Maximise / Restore';btns[2].title='Close';
+  btns[0].onclick=e=>{e.stopPropagation();_minWin(win);};
+  btns[1].onclick=e=>{e.stopPropagation();_maxWin(win);};
+  btns[2].onclick=e=>{e.stopPropagation();cw(winId);};
+}
+
+function _saveStyle(win){
+  return{left:win.style.left,top:win.style.top,transform:win.style.transform,width:win.style.width,maxHeight:win.style.maxHeight};
+}
+function _applyStyle(win,st){
+  if(!st)return;
+  Object.assign(win.style,st);
+}
+
+function _maxWin(win){
+  const s=_ws[win.id];
+  if(s.maxed){
+    win.classList.remove('maximized');
+    _applyStyle(win,s.savedStyle);
+    s.maxed=false;
+  } else {
+    if(s.mined)_minWin(win);// un-minimise first
+    s.savedStyle=_saveStyle(win);
+    win.classList.add('maximized');
+    win.style.left='';win.style.top='';win.style.transform='';win.style.width='';win.style.maxHeight='';
+    s.maxed=true;
+  }
+  _syncOverlay();
+}
+
+function _minWin(win){
+  const s=_ws[win.id];
+  const wid=win.id.replace('w-','');
+  if(s.mined){
+    // ── restore from dock ──
+    // First minimise any other non-minimised open window
+    document.querySelectorAll('.win.open').forEach(w=>{
+      if(w!==win&&!_ws[w.id].mined)_dockWindow(w);
+    });
+    win.classList.remove('minimized');
+    _applyStyle(win,s.savedStyle);
+    if(!s.savedStyle||!s.savedStyle.left){// was never manually placed → centre
+      win.style.left='50%';win.style.top='50%';win.style.transform='translate(-50%,-50%)';s.pinned=false;
+    }
+    s.mined=false;
+    _dock=_dock.filter(x=>x!==wid);
+    _placeDock();
+  } else {
+    _dockWindow(win);
+  }
+  _syncOverlay();
+}
+
+// Push a window into the dock (internal, does NOT toggle)
+function _dockWindow(win){
+  const s=_ws[win.id];const wid=win.id.replace('w-','');
+  if(s.mined)return;// already docked
+  if(s.maxed){win.classList.remove('maximized');s.maxed=false;}
+  s.savedStyle=_saveStyle(win);
+  win.classList.add('open','minimized');
+  s.mined=true;
+  if(!_dock.includes(wid))_dock.push(wid);
+  _placeDock();
+}
+
+function ow(id){
+  // Minimise any currently active (non-minimised) open windows to the dock
+  document.querySelectorAll('.win.open').forEach(w=>{
+    if(!_ws[w.id]?.mined)_dockWindow(w);
+  });
+  const win=document.getElementById('w-'+id);
+  const s=_ws['w-'+id];
+  // If it was docked, pull it out
+  if(s.mined){
+    win.classList.remove('minimized');
+    _applyStyle(win,s.savedStyle);
+    s.mined=false;
+    _dock=_dock.filter(x=>x!==id);
+    _placeDock();
+  }
+  // Centre if never manually placed
+  if(!s.pinned){win.style.left='50%';win.style.top='50%';win.style.transform='translate(-50%,-50%)';}
+  win.classList.add('open');
+  document.getElementById('ov').classList.add('show');
+  const ti=document.getElementById('ti-'+id);if(ti)ti.classList.add('on');
+  if(id==='chat')showRobot();
+}
+
+function cw(id){
+  const win=document.getElementById('w-'+id);
+  const s=_ws['w-'+id];
+  win.classList.remove('open','maximized','minimized');
+  _dock=_dock.filter(x=>x!==id);
+  if(s){s.maxed=false;s.mined=false;s.pinned=false;s.savedStyle=null;}
+  // Clear all inline position/size so it re-centres next open
+  win.style.left='50%';win.style.top='50%';win.style.transform='translate(-50%,-50%)';
+  win.style.width='';win.style.maxHeight='';win.style.zIndex='';
+  _placeDock();
+  const ti=document.getElementById('ti-'+id);if(ti)ti.classList.remove('on');
+  _syncOverlay();
+}
+
+function ca(){
+  document.querySelectorAll('.win').forEach(w=>{
+    w.classList.remove('open','maximized','minimized');
+    const s=_ws[w.id];
+    if(s){s.maxed=false;s.mined=false;s.pinned=false;s.savedStyle=null;}
+    w.style.left='50%';w.style.top='50%';w.style.transform='translate(-50%,-50%)';
+    w.style.width='';w.style.maxHeight='';w.style.zIndex='';
+  });
+  _dock=[];
+  document.getElementById('ov').classList.remove('show');
+  document.querySelectorAll('.ti').forEach(t=>t.classList.remove('on'));
+}
+
+// Init on load
+window.addEventListener('DOMContentLoaded',()=>{
+  document.querySelectorAll('.win').forEach(w=>_initWin(w));
+});
+
+// ══ ROBOT ANIMATION ══
+function showRobot(){
+  const rs=document.getElementById('robot-screen');
+  const cu=document.getElementById('chatUI');
+  rs.style.display='flex';cu.style.display='none';
+  setTimeout(()=>{
+    rs.style.transition='opacity .5s';rs.style.opacity='0';
+    setTimeout(()=>{rs.style.display='none';rs.style.opacity='1';rs.style.transition='';cu.style.display='flex';},500);
+  },2000);
+}
+
+// ══ PHONE COPY ══
+function copyPhone(){
+  const num='+353892011440';
+  const tip=document.getElementById('copyTip');
+  const done=()=>{tip.textContent='✓ COPIED!';tip.style.color='#27c93f';setTimeout(()=>{tip.textContent='→ COPY';tip.style.color='';},2000);};
+  if(navigator.clipboard&&navigator.clipboard.writeText){
+    navigator.clipboard.writeText(num).then(done).catch(()=>{fallbackCopy(num);done();});
+  }else{fallbackCopy(num);done();}
+}
+function fallbackCopy(text){
+  const el=document.createElement('textarea');el.value=text;el.style.position='fixed';el.style.top='-9999px';
+  document.body.appendChild(el);el.focus();el.select();
+  try{document.execCommand('copy');}catch(e){}
+  document.body.removeChild(el);
+}
+
+// ══ CHATBOT ══
+const KB={
+  greeting:['hello','good morning','howdy','hey there','greetings'],
+  about:['background','summary','profile','who is she','introduce','tell me about','about her'],
+  edu:['education','degree','university','studied','college','school','cgpa','gpa','masters','bachelor','engineering','limerick'],
+  exp:['experience','internship','career','worked','employed'],
+  proj:['project','built','developed','created','portfolio','code','resume scanner','yolo','weld','mask','blockchain','voting','fluid','damage'],
+  skills:['skill','tech stack','technology','stack','language','framework','python','aws','machine learning','pytorch','opencv'],
+  contact:['contact','reach','email','linkedin','phone','message','connect','number'],
+  avail:['availability','graduation','available to start','open to roles','looking for role','start working'],
+  pub:['publication','paper','journal','published','research','doi','blockchain paper'],
+  why:['why hire','value','contribute','stand out','unique','discipline','production','what makes her'],
+  funfacts:['fun fact','fun facts','hobbies','hobby','painting','poetry','swim','swimming','sports','cricket','football','soccer','interests','besides coding','after hours','personal life']
+};
+const PUB_LINK=`<a href="https://www.indjcst.com/archives/10.59256/indjcst.20250401033" target="_blank" rel="noopener" style="color:var(--cyan);text-decoration:underline;">Implementation Paper on Voting System Using Ethereum Blockchain and Ganache Tool</a>`;
+const RS={
+  greeting:"Hi there! 👋 I'm Khushi's AI assistant. Ask me anything about her background, projects, skills, or what she's like outside of work. What would you like to know?",
+  about:`Khushi is a software and CV/AI engineer who likes building things that make it out of the lab and into people's hands. With a computer science background and an MEng in Computer Vision and AI from the University of Limerick (finishing 2026), she's less interested in models that score well on a test set and more in the work of making them real: writing the code around them, deploying them, and making them fast and reliable enough to trust.<br><br>She's shipped applications across software, web, and cloud using Python, Java, JavaScript/Node, React, and AWS, with recent projects spanning weld defect detection with CNN and YOLO, edge AI deployment, and a serverless resume scanner. She also has a published paper — ${PUB_LINK}.<br><br>Most at home in Python, and now looking for her next role in Ireland.`,
+  edu:"🎓 Education:\n• M.Eng Computer Vision & AI — University of Limerick (2025–2026) | CGPA 3.48/4.0\n• B.E. Computer Science & Design — DSATM Bangalore (2021–2025) | CGPA 8.45/10\n• Pre-University — Sri Chaithanya PU College | 92.33%\n• Secondary — Sharada Vidyalaya School | 90.2%",
+  exp:"💼 Work Experience:\n\n• Cloud Application Developer Intern — Skill India PMKVY 4.0 (Dec 2024–May 2025)\n  ↳ AWS Lambda, S3, SQS, DynamoDB, API Gateway. NASSCOM-certified Grade B.\n\n• Web Developer Intern — TekkyBench (Oct–Nov 2023)\n  ↳ Led cross-functional team on responsive web development.\n\n• Software Developer Intern — Flashflow Technologies (May–Jun 2023)\n  ↳ RESTful APIs in Java Spring Boot + MongoDB.",
+  proj:`🚀 <strong style="color:var(--lp);">Projects:</strong><br><br>⚡ <strong style="color:var(--lp);">Weld Defect Detection</strong> <span style="color:var(--cyan);font-size:.8em;">[IN PROGRESS]</span><br>&nbsp;&nbsp;YOLOv11 + attention mechanisms on LoHi-Weld dataset<br>&nbsp;&nbsp;<em style="color:var(--gray);">Python · PyTorch · OpenCV</em><br><br>🤖 <strong style="color:var(--lp);">AI Resume Scanner & ATS Checker</strong><br>&nbsp;&nbsp;Serverless SaaS on AWS with Mistral AI<br>&nbsp;&nbsp;<em style="color:var(--gray);">Python · AWS Lambda · Mistral AI</em><br><br>😷 <strong style="color:var(--lp);">Real-Time Face Mask Detection</strong><br>&nbsp;&nbsp;Edge AI on OpenMV with &lt;1s latency<br>&nbsp;&nbsp;<em style="color:var(--gray);">Python · TFLite · OpenMV</em><br><br>🛰️ <strong style="color:var(--lp);">Building Damage Detection</strong><br>&nbsp;&nbsp;CNN-based satellite imagery analysis<br>&nbsp;&nbsp;<em style="color:var(--gray);">Python · PyTorch · CNN</em><br><br>🗳️ <strong style="color:var(--lp);">Ethereum Voting System</strong> — `+PUB_LINK+`<br>&nbsp;&nbsp;Decentralised voting on blockchain<br>&nbsp;&nbsp;<em style="color:var(--gray);">Solidity · Ethereum · Ganache · Web3.js</em><br><br>🌊 <strong style="color:var(--lp);">Fluid Flow Simulation</strong><br>&nbsp;&nbsp;1D Navier-Stokes numerical methods<br>&nbsp;&nbsp;<em style="color:var(--gray);">Python · NumPy · Matplotlib</em>`,
+  skills:"⚡ Tech Stack:\n• Languages: Python, Java, JavaScript, SQL, C++, R\n• AI/ML/CV: PyTorch, TFLite, CNNs, YOLOv11, OpenCV, Mistral AI, LLM integration\n• Cloud: AWS Lambda, S3, DynamoDB, SQS, API Gateway, CloudWatch, Cognito, Docker\n• Frameworks: Flask, Spring Boot, React.js, Node.js, Web3.js",
+  contact:`📡 Reach Khushi:<br>• Email: <a href="mailto:khushirai688@gmail.com" style="color:var(--cyan);text-decoration:underline;">khushirai688@gmail.com</a><br>• LinkedIn: <a href="https://linkedin.com/in/khushi-rai-688dp" target="_blank" rel="noopener" style="color:var(--cyan);text-decoration:underline;">linkedin.com/in/khushi-rai-688dp</a><br>• GitHub: <a href="https://github.com/khushiraiii" target="_blank" rel="noopener" style="color:var(--cyan);text-decoration:underline;">github.com/khushiraiii</a><br>• Mobile: <span onclick="copyPhone()" style="color:var(--cyan);text-decoration:underline;cursor:pointer;font-family:'Share Tech Mono',monospace;">+353 892 011 440</span> <span style="color:var(--gray);font-size:.85em;">(tap to copy)</span>`,
+  avail:`✅ Khushi graduates in <strong style="color:var(--lp);">September 2026</strong> and is available to start immediately after.<br><br>She's actively looking for roles in Ireland across AI/ML engineering, computer vision, software engineering, and cloud development — remote, hybrid, or on-site.<br><br>📧 <a href="mailto:khushirai688@gmail.com" style="color:var(--cyan);text-decoration:underline;">khushirai688@gmail.com</a>`,
+  pub:`📄 Published Research:<br>${PUB_LINK}<br><br>Indian Journal of CS & Technology · ISSN: 2583-5300 · Vol.4 Issue 1 · Jan–Apr 2025 · PP: 209–215`,
+  why:"💪 Why hire Khushi?\n\nShe bridges two things that often live in separate people: the research instinct to build a good model, and the engineering discipline to make it run in production. She doesn't stop at a strong test-set score — she cares about latency, reliability, and whether the thing actually holds up once real users and real data hit it.\n\nThat comes from shipping software across cloud, web, and edge environments, not just training models in isolation. She's comfortable across the full stack of an AI product: from the vision model at the core to the REST APIs, databases, and cloud infrastructure around it — and she moves down to C/C++ when performance demands it.\n\nShe learns fast, likes ownership, and is at her best when a project runs end to end — from first commit to live deployment.",
+  funfacts:"🎉 Fun facts about Khushi:\n\n🎨 When she's not writing code, she's usually painting or writing poetry — genuinely creative outlets, not just something she put on a CV.\n\n🏏 She's not much of a sports person, but her dad has made cricket and football a permanent fixture at home. Ask her about either and there's a good chance she'll surprise you with what she knows.\n\n🏊 She grew up in a coastal region, which makes her a very strong swimmer — one of those skills with absolutely no GitHub commit history behind it.",
+  def:"I can tell you about Khushi's:\n• 👤 Background & who she is\n• 🎓 Education (graduating UL Sep 2026)\n• 💼 Work experience (3 internships)\n• 🚀 Projects (6, including live YOLOv11 research)\n• ⚡ Skills & tech stack\n• 📡 Contact details\n• ✅ Availability\n• 🎉 Fun facts\n\nJust ask! 🤖"
+};
+function getResp(msg){
+  const l=msg.toLowerCase();
+  // Use whole-word matching so 'hi' doesn't fire inside 'Khushi' or 'hire'
+  const has=k=>{
+    const safe=k.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    return new RegExp('(?:^|[^a-z])'+safe+'(?:[^a-z]|$)').test(l);
+  };
+  const any=arr=>arr.some(has);
+  if(any(KB.greeting))return RS.greeting;
+  if(any(KB.funfacts))return RS.funfacts;
+  if(any(KB.why))return RS.why;
+  if(any(KB.pub))return RS.pub;
+  if(any(KB.avail))return RS.avail;
+  if(any(KB.contact))return RS.contact;
+  if(any(KB.skills))return RS.skills;
+  if(any(KB.proj))return RS.proj;
+  if(any(KB.exp))return RS.exp;
+  if(any(KB.edu))return RS.edu;
+  if(any(KB.about))return RS.about;
+  return RS.def;
+}
+function addMsg(txt,who){
+  const c=document.getElementById('chatMsgs');
+  const d=document.createElement('div');d.className='msg '+who;
+  // Bot messages may contain HTML links; user messages are always plain text
+  const body=who==='u'
+    ? txt.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    : (txt.includes('<a ')||txt.includes('<span ')||txt.includes('<br>')
+        ? txt : txt.replace(/\n/g,'<br>'));
+  d.innerHTML=`<div class="mav">${who==='b'?'AI':'YOU'}</div><div class="mb">${body}</div>`;
+  c.appendChild(d);c.scrollTop=c.scrollHeight;
+}
+function showTyping(){
+  const c=document.getElementById('chatMsgs');
+  const d=document.createElement('div');d.className='msg b';d.id='typ';
+  d.innerHTML='<div class="mav">AI</div><div class="cir"><div class="cd"></div><div class="cd"></div><div class="cd"></div></div>';
+  c.appendChild(d);c.scrollTop=c.scrollHeight;
+}
+function sc(){
+  const inp=document.getElementById('ci');const msg=inp.value.trim();if(!msg)return;
+  addMsg(msg,'u');inp.value='';
+  showTyping();
+  setTimeout(()=>{document.getElementById('typ')?.remove();addMsg(getResp(msg),'b');},700+Math.random()*500);
+}
+function aq(q){document.getElementById('ci').value=q;sc();}
+</script>
+</body>
+</html>
